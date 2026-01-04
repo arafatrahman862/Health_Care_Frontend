@@ -3,7 +3,7 @@ import React, { type JSX } from "react";
 type Notifier = () => void;
 
 interface Watchable {
-  watch(notifier: Notifier);
+  watch(notifier: Notifier): void;
   remove(notifier: Notifier): void;
 }
 
@@ -17,26 +17,28 @@ interface WatchState {
 }
 
 export class Watch extends React.Component<WatchProps, WatchState> {
-  update = () => {
-    this.forceUpdate();
-  };
+  state: WatchState = {
+    update: () => {
+      this.forceUpdate();
+    },
+  }
 
   /** initState */
   componentDidMount() {
-    this.props.signal.watch(this.update);
+    this.props.signal.watch(this.state.update);
   }
 
   /** didUpdateWidget */
   componentDidUpdate(old: WatchProps, oldState: WatchState) {
     if (old.signal !== this.props.signal) {
       old.signal.remove(oldState.update);
-      this.props.signal.watch(this.update);
+      this.props.signal.watch(this.state.update);
     }
   }
 
   /** dispose */
   componentWillUnmount() {
-    this.props.signal.remove(this.update);
+    this.props.signal.remove(this.state.update);
   }
 
   render() {
@@ -94,18 +96,18 @@ export function marge(...watchables: Watchable[]) {
 }
 
 export class MergedSignal implements Watchable {
-  children: Iterable<Watchable>;
-  constructor(children: Iterable<Watchable>) {
-    this.children = children;
+  signals: Iterable<Watchable>;
+  constructor(signals: Iterable<Watchable>) {
+    this.signals = signals;
   }
   watch(notifier: Notifier) {
-    for (const child of this.children) {
-      child.watch(notifier);
+    for (const signal of this.signals) {
+      signal.watch(notifier);
     }
   }
   remove(notifier: Notifier) {
-    for (const child of this.children) {
-      child.remove(notifier);
+    for (const signal of this.signals) {
+      signal.remove(notifier);
     }
   }
 }
