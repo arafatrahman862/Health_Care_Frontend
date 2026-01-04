@@ -1,6 +1,7 @@
 import React, { type JSX } from "react";
 
 type Notifier = () => void;
+type Notified<T> = (value: T) => void;
 
 interface Watchable {
   watch(notifier: Notifier): void;
@@ -62,12 +63,15 @@ export class Signal<T> implements Watchable {
     this.#value = newValue;
   }
 
-  update(cb: (value: T) => void) {
+  update(cb: Notified<T>) {
     cb(this.#value);
     this.notify();
   }
 
   set(newValue: T) {
+    if (this.#value == newValue) {
+      return; // optimization
+    }
     this.#value = newValue;
     this.notify();
   }
@@ -86,8 +90,12 @@ export class Signal<T> implements Watchable {
     this.#listeners.delete(notifier);
   }
 
+  effect(cb: Notifier) {
+    return new Effect(this, cb)
+  }
+
   toString() {
-    return `State(${this.#value})`;
+    return `Signal { value: ${this.#value}, watching: ${this.#listeners.size} }`;
   }
 }
 
@@ -96,18 +104,41 @@ export function marge(...watchables: Watchable[]) {
 }
 
 export class MergedSignal implements Watchable {
-  signals: Iterable<Watchable>;
+  #signals: Iterable<Watchable>;
   constructor(signals: Iterable<Watchable>) {
-    this.signals = signals;
+    this.#signals = signals;
   }
   watch(notifier: Notifier) {
-    for (const signal of this.signals) {
+    for (const signal of this.#signals) {
       signal.watch(notifier);
     }
   }
   remove(notifier: Notifier) {
-    for (const signal of this.signals) {
+    for (const signal of this.#signals) {
       signal.remove(notifier);
     }
+  }
+
+  effect(cb: Notifier) {
+    return new Effect(this, cb)
+  }
+}
+
+export class Effect {
+  #signal: Watchable;
+  #effect: Notifier;
+
+  constructor(signal: Watchable, cb: Notifier) {
+    this.#signal = signal;
+    this.#effect = cb;
+    this.#signal.watch(cb)
+  }
+  
+  [Symbol.dispose]() {
+    this.drop()
+  }
+
+  drop() {
+    this.#signal.remove(this.#effect)
   }
 }
