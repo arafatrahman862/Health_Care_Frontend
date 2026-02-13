@@ -63,7 +63,7 @@ export const registerPatient = async (
       password: formData.get("password"),
       patient: {
         name: formData.get("name"),
-        address: formData.get("address"),
+        address: formData.get("address"), 
         email: formData.get("email"),
       },
     };
