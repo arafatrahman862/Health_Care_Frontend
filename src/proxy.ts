@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getDefaultDashboardRoute, getRouteOwner, isAuthRoute, UserRole } from './lib/auth-utils';
-import { deleteCookie } from './services/auth/tokenHandlers';
+import { deleteCookie, getCookie } from './services/auth/tokenHandlers';
 
 
 
@@ -12,7 +12,9 @@ export async function proxy(request: NextRequest) {
     // const cookieStore = await cookies()
     const pathname = request.nextUrl.pathname;
 
-    const accessToken = request.cookies.get("accessToken")?.value || null;
+    // const accessToken = request.cookies.get("accessToken")?.value || null;
+
+    const accessToken = await getCookie("accessToken") || null;
 
     let userRole: UserRole | null = null;
     if (accessToken) {
