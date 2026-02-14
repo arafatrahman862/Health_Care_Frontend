@@ -1,5 +1,8 @@
+// import LoginSuccessToast from "@/components/shared/LoginSuccessToast";
+// import LogoutSuccessToast from "@/components/shared/LogoutSuccessToast";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Health Care",
-  description: "A modern health care app built with Next.js and Tailwind CSS",
+  title: "Health-Care",
+  description: "A healthcare application built with Next.js",
 };
 
 export default function RootLayout({
@@ -28,6 +31,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster position="top-right" richColors />
+        {/* <LoginSuccessToast />
+        <LogoutSuccessToast /> */}
       </body>
     </html>
   );
