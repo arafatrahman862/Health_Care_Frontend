@@ -2,6 +2,7 @@
 "use server";
 
 import z from "zod";
+import { loginUser } from "./loginUser";
 
 
 
@@ -63,7 +64,7 @@ export const registerPatient = async (
       password: formData.get("password"),
       patient: {
         name: formData.get("name"),
-        address: formData.get("address"), 
+        address: formData.get("address"),
         email: formData.get("email"),
       },
     };
@@ -78,12 +79,19 @@ export const registerPatient = async (
         method: "POST",
         body: newFormData,
       }
-    ).then((res) => res.json());
+    )
 
+    const result = await res.json();
     console.log(res, "res");
+    if (result.success) {
+      await loginUser(_currentState, formData); // Automatically log in the user after successful registration
+    }
 
-    return res;
-  } catch (error) {
+    return result;
+  } catch (error: any) {
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
     console.log(error);
     return { error: "Registration failed" };
   }
