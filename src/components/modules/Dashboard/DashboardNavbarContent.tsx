@@ -7,9 +7,5 @@ interface DashboardNavbarContentProps {
 }
 
 export default function DashboardNavbarContent({ userInfo}: DashboardNavbarContentProps) {
-  return (
-    <div>
-      <h1>This is DashboardNavbarContent component</h1>
-    </div>
-  );
+  return <header>Dashboard Navbar</header>
 }

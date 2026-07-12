@@ -22,6 +22,7 @@ export const getUserInfo = async (): Promise<UserInfo | null> => {
         }
 
         const userInfo: UserInfo = {
+            name: verifiedToken.name || "Unknown User",
             email: verifiedToken.email,
             role: verifiedToken.role
         }
